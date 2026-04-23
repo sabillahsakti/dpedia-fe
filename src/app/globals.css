@@ -1,0 +1,56 @@
+﻿@import "tailwindcss";
+
+@theme {
+  --color-dpedia-background: #0a0a0a;
+  --color-dpedia-surface: #141414;
+  --color-dpedia-elevated: #1c1c1c;
+  --color-dpedia-primary: #e50914;
+  --color-dpedia-secondary: #c9a84c;
+  --color-dpedia-text: #ffffff;
+  --color-dpedia-muted: #a3a3a3;
+  --color-dpedia-border: #2a2a2a;
+  --font-sans: var(--font-inter), sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #0a0a0a;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(229, 9, 20, 0.18), transparent 32rem),
+    radial-gradient(circle at 80% 10%, rgba(201, 168, 76, 0.12), transparent 28rem),
+    #0a0a0a;
+  color: #ffffff;
+  font-family: var(--font-inter), sans-serif;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.shadow-glow { box-shadow: 0 0 40px rgba(229, 9, 20, 0.22); }
+
