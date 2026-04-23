@@ -1,5 +1,5 @@
 ﻿import { api, unwrap } from "./axios";
-import type { AdminStats, PaginatedEnvelope, Payment, User } from "@/types";
+import type { AdminStats, PaginatedEnvelope, Payment, User, UserSession } from "@/types";
 
 async function unwrapPaginated<T>(request: Promise<{ data: PaginatedEnvelope<T> }>) {
   const response = await request;
@@ -15,4 +15,6 @@ export const adminApi = {
   rejectPayment: (id: string, notes?: string) => unwrap<Payment>(api.post(`/admin/payments/${id}/reject`, { notes })),
   users: (params: { page?: number; per_page?: number }) => unwrapPaginated<User>(api.get("/admin/users", { params })),
   user: (id: string) => unwrap<User>(api.get(`/admin/users/${id}`)),
+  sessions: (params: { page?: number; per_page?: number }) => unwrapPaginated<UserSession>(api.get("/admin/sessions", { params })),
+  userSessions: (id: string) => unwrap<UserSession[]>(api.get(`/admin/users/${id}/sessions`)),
 };

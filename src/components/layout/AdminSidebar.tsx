@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, CreditCard, Menu, Users } from "lucide-react";
+import { BarChart3, CreditCard, Menu, MonitorSmartphone, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/store/authStore";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const items = [
   { href: "/admin", label: "Dashboard", icon: BarChart3 },
   { href: "/admin/payments", label: "Payments", icon: CreditCard },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/sessions", label: "Sessions", icon: MonitorSmartphone },
 ];
 
 export function AdminSidebar() {

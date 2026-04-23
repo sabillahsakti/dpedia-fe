@@ -11,7 +11,7 @@ import { contentApi } from "@/lib/api/content";
 const fallbackSources = ["dramabite", "dramabox", "dotdrama", "melolo", "netshort", "reelife", "stardusttv"];
 
 export default function HomePage() {
-  const [source, setSource] = useState("dramabite");
+  const [source, setSource] = useState("melolo");
   const sources = useQuery({ queryKey: ["sources"], queryFn: contentApi.sources });
   const feed = useInfiniteQuery({
     queryKey: ["feed", source],

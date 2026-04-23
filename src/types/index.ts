@@ -23,6 +23,21 @@ export interface User {
   updated_at: string;
 }
 
+export interface UserSession {
+  id: string;
+  user_id: string;
+  user_email?: string;
+  user_name?: string;
+  ip_address: string;
+  user_agent: string;
+  device_name: string;
+  last_seen_at: string;
+  expires_at: string;
+  revoked_at?: string | null;
+  created_at: string;
+  is_active: boolean;
+}
+
 export interface AuthResult {
   user: User;
   access_token: string;

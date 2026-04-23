@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Crown } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { EpisodeList } from "@/components/content/EpisodeList";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VideoPlayer } from "@/components/content/VideoPlayer";
@@ -13,6 +13,7 @@ import { useAuthStore } from "@/lib/store/authStore";
 
 export default function WatchPage() {
   const params = useParams<{ source: string; id: string }>();
+  const router = useRouter();
   const source = params.source;
   const id = decodeURIComponent(params.id);
   const hasToken = !!useAuthStore((s) => s.accessToken);
@@ -27,13 +28,30 @@ export default function WatchPage() {
     saveHistory.mutate();
   }, [episode.data?.id, episode.data?.video_url, hasToken, saveHistory]);
 
+  const currentIndex = siblings.data?.findIndex((item) => item.id === id) ?? -1;
+  const nextEpisode = currentIndex >= 0 ? siblings.data?.[currentIndex + 1] : undefined;
+
+  const handleEnded = useCallback(() => {
+    if (!nextEpisode) return;
+
+    const goNext = () => router.push(`/watch/${source}/${encodeURIComponent(nextEpisode.id)}`);
+
+    if (typeof document !== "undefined" && document.fullscreenEnabled && !document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(goNext).catch(goNext);
+      return;
+    }
+
+    goNext();
+  }, [nextEpisode, router, source]);
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-6">
-      <VideoPlayer url={episode.data?.video_url} />
+      <VideoPlayer url={episode.data?.video_url} onEnded={handleEnded} autoPlay />
       {episode.isError && <div className="mt-4 rounded-xl border border-dpedia-secondary/30 bg-dpedia-secondary/10 p-4 text-dpedia-secondary"><Crown className="mb-2 h-5 w-5" />Berlangganan untuk menonton episode premium. <Link className="font-bold underline" href="/subscription">Lihat paket</Link></div>}
       <section className="mt-5 rounded-xl border border-dpedia-border bg-dpedia-surface p-5">
         <p className="text-sm text-dpedia-muted">Sedang menonton</p>
         <h1 className="text-2xl font-bold tracking-tight">Episode {episode.data?.index || "-"}</h1>
+        <p className="mt-2 text-sm text-dpedia-muted">Auto lanjut episode berikutnya aktif{nextEpisode ? `: Episode ${nextEpisode.index}` : ", ini episode terakhir"}.</p>
         {episode.data?.is_locked && !episode.data.video_url && <div className="mt-4 rounded-xl bg-dpedia-primary/10 p-4 text-sm text-dpedia-primary">Episode ini butuh subscription aktif.</div>}
       </section>
       <section className="mt-5 rounded-xl border border-dpedia-border bg-dpedia-elevated p-5">
