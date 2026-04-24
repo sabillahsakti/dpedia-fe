@@ -14,7 +14,12 @@ export function PlanCard({ plan, featured }: { plan: Plan; featured?: boolean })
   const mutation = useMutation({
     mutationFn: () => paymentApi.request(plan.id),
     onSuccess: (data) => {
-      toast.success("Payment dibuat");
+      if (typeof window !== "undefined") {
+        if (data.checkout_url) {
+          window.open(data.checkout_url, "_blank", "noopener,noreferrer");
+        }
+      }
+      toast.success(data.checkout_url ? "Payment dibuat, membuka Pakasir" : "Payment dibuat");
       router.push(`/payment/${data.payment_id}`);
     },
     onError: (error) => toast.error(apiErrorMessage(error)),

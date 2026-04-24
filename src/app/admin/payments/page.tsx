@@ -14,7 +14,11 @@ const statuses = ["", "pending", "confirmed", "rejected"];
 export default function AdminPaymentsPage() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
-  const payments = useQuery({ queryKey: ["admin-payments", status, page], queryFn: () => adminApi.payments({ status: status || undefined, page, per_page: 20 }) });
+  const payments = useQuery({
+    queryKey: ["admin-payments", status, page],
+    queryFn: () => adminApi.payments({ status: status || undefined, page, per_page: 20 }),
+    refetchInterval: 5000,
+  });
   return (
     <div>
       <h1 className="text-3xl font-black tracking-tight">Payments</h1>

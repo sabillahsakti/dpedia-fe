@@ -65,10 +65,12 @@ export interface Subscription {
 
 export interface PaymentRequestResult {
   payment_id: string;
+  order_id: string;
   amount: number;
   unique_code: number;
   total_amount: number;
   qris_info: string;
+  checkout_url: string;
   expires_at: string;
 }
 
@@ -76,11 +78,14 @@ export interface Payment {
   id: string;
   user_id: string;
   plan_id: string;
+  order_id?: string;
   amount: number;
   unique_code: number;
   total_amount: number;
   status: "pending" | "confirmed" | "rejected" | "expired";
   proof_image_url?: string | null;
+  qris_info?: string;
+  checkout_url?: string;
   notes?: string | null;
   expires_at: string;
   confirmed_at?: string | null;

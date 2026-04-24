@@ -31,8 +31,8 @@
   `/subscription -> AuthGate -> SubscriptionPage -> paymentApi.plans + userApi.subscription -> PlanCard -> paymentApi.request -> POST /payment/request -> router.push /payment/:id`
 - Payment history:
   `/payment -> AuthGate -> PaymentPage -> paymentApi.history -> GET /payment/history -> Payment item -> /payment/:id`
-- Payment detail/upload proof:
-  `/payment/[id] -> AuthGate -> PaymentDetailPage -> paymentApi.detail -> PaymentDetail + countdown -> ProofUpload -> paymentApi.uploadProof -> multipart POST /payment/:id/proof -> invalidate payment query`
+- Payment detail/gateway:
+  `/payment/[id] -> AuthGate -> PaymentDetailPage -> paymentApi.detail -> PaymentDetail + countdown -> open checkout_url Pakasir -> poll GET /payment/:id until webhook confirms`
 - Admin guard:
   `/admin/* -> middleware cookie check -> AdminLayout -> AuthGate[adminOnly] -> useAuthStore.user.role === admin -> render atau redirect /`
 - Admin dashboard:
@@ -90,7 +90,6 @@ src/
     layout/TopBar.tsx
     payment/PaymentDetail.tsx
     payment/PlanCard.tsx
-    payment/ProofUpload.tsx
     ui/badge.tsx
     ui/button.tsx
     ui/card.tsx
@@ -230,9 +229,6 @@ tsconfig.json
 - `src/components/payment/PaymentDetail.tsx`
   - Fungsi/class publik utama: `PaymentDetail`.
   - Peran modul: ringkasan detail payment dan status badge.
-- `src/components/payment/ProofUpload.tsx`
-  - Fungsi/class publik utama: `ProofUpload`.
-  - Peran modul: upload bukti transfer multipart dan invalidate query payment.
 - `src/components/admin/SessionCard.tsx`
   - Fungsi/class publik utama: `SessionCard`.
   - Peran modul: visualisasi device/session user dengan IP, user-agent, last seen, expiry, revoked.
@@ -320,7 +316,7 @@ tsconfig.json
 - Upload/static backend: dikonfigurasi oleh `NEXT_PUBLIC_UPLOADS_URL`, dipakai admin payment detail untuk preview proof image.
 - Auth/JWT backend: `authApi` dan `axios` interceptor untuk login/register/logout/refresh.
 - Content provider indirect: frontend tidak memanggil provider upstream langsung; semua lewat backend `/content/*`.
-- Payment proof upload: `paymentApi.uploadProof` mengirim multipart/form-data ke backend.
+- Payment gateway redirect: `checkout_url` dari backend dipakai frontend untuk membuka checkout Pakasir.
 - React Player media loading: `VideoPlayer` memuat stream URL dari backend episode response.
 - Google Fonts melalui `next/font/google` untuk Inter.
 - Browser APIs: `localStorage`, `document.cookie`, `document.fullscreenEnabled`, `requestFullscreen`.

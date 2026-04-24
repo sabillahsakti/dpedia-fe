@@ -20,7 +20,11 @@ export default function AdminPaymentDetailPage() {
   const queryClient = useQueryClient();
   const [action, setAction] = useState<"confirm" | "reject" | null>(null);
   const [notes, setNotes] = useState("");
-  const payment = useQuery({ queryKey: ["admin-payment", params.id], queryFn: () => adminApi.payment(params.id) });
+  const payment = useQuery({
+    queryKey: ["admin-payment", params.id],
+    queryFn: () => adminApi.payment(params.id),
+    refetchInterval: (query) => query.state.data?.status === "pending" ? 5000 : false,
+  });
   const mutation = useMutation({
     mutationFn: async () => {
       if (action === "confirm") return adminApi.confirmPayment(params.id, notes || undefined);

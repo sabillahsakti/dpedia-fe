@@ -3,7 +3,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { formatDate, formatRupiah } from "@/lib/utils";
 import type { Payment } from "@/types";
 
-export function PaymentDetail({ payment, qrisInfo }: { payment: Payment; qrisInfo?: string }) {
+export function PaymentDetail({ payment }: { payment: Payment }) {
   return (
     <Card className="space-y-4 p-5">
       <div className="flex items-center justify-between">
@@ -11,6 +11,8 @@ export function PaymentDetail({ payment, qrisInfo }: { payment: Payment; qrisInf
         <StatusBadge status={payment.status} />
       </div>
       <div className="grid grid-cols-2 gap-3 text-sm">
+        <Info label="Payment ID" value={<span className="break-all font-mono text-xs">{payment.id}</span>} />
+        <Info label="Order ID" value={payment.order_id ? <span className="break-all font-mono text-xs">{payment.order_id}</span> : "-"} />
         <Info label="Amount" value={formatRupiah(payment.amount)} />
         <Info label="Kode Unik" value={payment.unique_code} />
         <Info label="Total Transfer" value={formatRupiah(payment.total_amount)} highlight />
@@ -18,7 +20,7 @@ export function PaymentDetail({ payment, qrisInfo }: { payment: Payment; qrisInf
         <Info label="Dibuat" value={formatDate(payment.created_at)} />
         <Info label="Catatan" value={payment.notes || "-"} />
       </div>
-      {qrisInfo && <div className="rounded-xl border border-dpedia-secondary/30 bg-dpedia-secondary/10 p-4 text-sm text-dpedia-secondary">{qrisInfo}</div>}
+      {payment.qris_info && <div className="rounded-xl border border-dpedia-secondary/30 bg-dpedia-secondary/10 p-4 text-sm text-dpedia-secondary">{payment.qris_info}</div>}
     </Card>
   );
 }
