@@ -1,5 +1,5 @@
 ﻿# Project Summary
-- Tujuan aplikasi: frontend DPedia untuk streaming drama pendek, autentikasi user/admin, browsing konten dari banyak source, menonton episode, langganan, pembayaran manual, upload bukti transfer, dan panel admin.
+- Tujuan aplikasi: frontend DPedia untuk streaming drama pendek, autentikasi user/admin, browsing konten dari banyak source, menonton episode, langganan, pembayaran via Pakasir, panel admin, serta kontrol admin untuk paket dan provider konten.
 - Tech stack utama: Next.js 16.2.4 App Router, React 19, TypeScript, Tailwind CSS v4, TanStack Query v5, Zustand persist, Axios, react-player, lucide-react, sonner toast.
 - Runtime: Node.js untuk build/start Next.js; browser client untuk sebagian besar halaman karena data fetching, auth state, dan aksi API berada di client component.
 - DB lokal frontend: Not found; data persisten client hanya `localStorage` Zustand dan cookie mirror `dpedia_access_token`.
@@ -37,6 +37,10 @@
   `/admin/* -> middleware cookie check -> AdminLayout -> AuthGate[adminOnly] -> useAuthStore.user.role === admin -> render atau redirect /`
 - Admin dashboard:
   `/admin -> AdminDashboardPage -> adminApi.stats -> GET /admin/stats -> stat cards`
+- Admin plans:
+  `/admin/plans -> AdminPlansPage -> adminApi.plans -> GET /admin/plans -> create/update plan -> POST/PATCH /admin/plans`
+- Admin provider control:
+  `/admin/providers -> AdminProvidersPage -> adminApi.providers -> GET /admin/providers -> toggle source -> PATCH /admin/providers/:source`
 - Admin payment moderation:
   `/admin/payments -> AdminPaymentsPage -> adminApi.payments -> GET /admin/payments -> /admin/payments/:id -> AdminPaymentDetailPage -> adminApi.payment -> confirm/reject mutation -> POST /admin/payments/:id/confirm|reject`
 - Admin users:
@@ -65,9 +69,11 @@ src/
     admin/
       layout.tsx
       page.tsx
+      plans/page.tsx
       payments/
         page.tsx
         [id]/page.tsx
+      providers/page.tsx
       sessions/page.tsx
       users/
         page.tsx
@@ -150,10 +156,10 @@ tsconfig.json
   - Peran modul: layout user-facing dengan `TopBar` dan `BottomNav`.
 - `src/app/(main)/page.tsx`
   - Fungsi/class publik utama: `HomePage`.
-  - Peran modul: feed home dengan source switcher, infinite query, card grid, dan load more.
+  - Peran modul: feed home dengan source switcher berbasis provider aktif dari backend, infinite query, card grid, dan load more.
 - `src/app/(main)/browse/page.tsx`
   - Fungsi/class publik utama: `BrowsePage`.
-  - Peran modul: browse konten berdasarkan source dan tab/kata kunci.
+  - Peran modul: browse konten berdasarkan source aktif dan tab/kata kunci.
 - `src/app/(main)/series/[source]/[id]/page.tsx`
   - Fungsi/class publik utama: `SeriesDetailPage`.
   - Peran modul: detail series, hero cover, metadata, tombol tonton, dan grid episode.
@@ -178,6 +184,12 @@ tsconfig.json
 - `src/app/admin/page.tsx`
   - Fungsi/class publik utama: `AdminDashboardPage`.
   - Peran modul: dashboard statistik admin.
+- `src/app/admin/plans/page.tsx`
+  - Fungsi/class publik utama: `AdminPlansPage`.
+  - Peran modul: halaman admin untuk membuat dan mengedit paket langganan.
+- `src/app/admin/providers/page.tsx`
+  - Fungsi/class publik utama: `AdminProvidersPage`.
+  - Peran modul: halaman admin untuk mengaktifkan atau mematikan provider konten.
 - `src/app/admin/payments/page.tsx`
   - Fungsi/class publik utama: `AdminPaymentsPage`.
   - Peran modul: daftar pembayaran admin dengan filter status dan pagination sederhana.
@@ -207,7 +219,7 @@ tsconfig.json
   - Peran modul: navigasi mobile fixed untuk Home, Browse, Langganan, Profil.
 - `src/components/layout/AdminSidebar.tsx`
   - Fungsi/class publik utama: `AdminSidebar`.
-  - Peran modul: navigasi admin desktop/mobile untuk dashboard, payments, users, sessions.
+  - Peran modul: navigasi admin desktop/mobile untuk dashboard, plans, providers, payments, users, sessions.
 - `src/components/auth/LoginForm.tsx`
   - Fungsi/class publik utama: `LoginForm`.
   - Peran modul: form login, mutation auth, toast error, dan sinkronisasi auth store.
@@ -261,7 +273,7 @@ tsconfig.json
   - Peran modul: wrapper endpoint auth register/login/logout.
 - `src/lib/api/content.ts`
   - Fungsi/class publik utama: `contentApi`.
-  - Peran modul: wrapper endpoint content sources, feed, series, episodes, episode, languages, watch-history.
+  - Peran modul: wrapper endpoint content sources, feed, series, episodes, episode, languages, watch-history; daftar source mengikuti provider aktif dari backend.
 - `src/lib/api/payment.ts`
   - Fungsi/class publik utama: `paymentApi`.
   - Peran modul: wrapper endpoint plans, payment request/history/detail, dan upload proof.
@@ -270,7 +282,7 @@ tsconfig.json
   - Peran modul: wrapper endpoint profile dan subscription user.
 - `src/lib/api/admin.ts`
   - Fungsi/class publik utama: `adminApi`.
-  - Peran modul: wrapper endpoint admin stats, payments, users, sessions, confirm/reject.
+  - Peran modul: wrapper endpoint admin stats, plans, providers, payments, users, sessions, confirm/reject.
 - `src/lib/store/authStore.ts`
   - Fungsi/class publik utama: `useAuthStore`, `authSnapshot`.
   - Peran modul: Zustand persisted auth state dan cookie mirror untuk middleware.
@@ -278,7 +290,7 @@ tsconfig.json
   - Fungsi/class publik utama: `cn`, `formatRupiah`, `formatDate`, `apiErrorMessage`, `statusLabel`.
   - Peran modul: utility styling, format, dan normalisasi error.
 - `src/types/index.ts`
-  - Fungsi/class publik utama: `ApiEnvelope`, `PaginatedEnvelope`, `User`, `UserSession`, `AuthResult`, `Plan`, `Subscription`, `Payment`, `Series`, `Episode`, `FeedItem`, `AdminStats`.
+  - Fungsi/class publik utama: `ApiEnvelope`, `PaginatedEnvelope`, `User`, `UserSession`, `AuthResult`, `Plan`, `Subscription`, `Payment`, `Series`, `Episode`, `FeedItem`, `AdminStats`, `ProviderStatus`.
   - Peran modul: kontrak TypeScript response/API domain frontend.
 - `tailwind.config.ts`
   - Fungsi/class publik utama: `config`.
@@ -296,7 +308,7 @@ tsconfig.json
   - `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`: config TypeScript/lint/PostCSS.
 - Skema data singkat:
   - DB lokal: Not found.
-  - Entity TypeScript inti: `User`, `UserSession`, `Plan`, `Subscription`, `Payment`, `Series`, `Episode`, `Subtitle`, `FeedItem`, `AdminStats`.
+  - Entity TypeScript inti: `User`, `UserSession`, `Plan`, `Subscription`, `Payment`, `Series`, `Episode`, `Subtitle`, `FeedItem`, `AdminStats`, `ProviderStatus`.
   - Relasi data di frontend bersifat referensial dari API: `Payment.user_id/plan_id`, `Subscription.user_id/plan_id`, `Episode.series_id/source`, `UserSession.user_id`.
 - Lokasi migration/seed:
   - Migration frontend: Not found.
@@ -316,6 +328,7 @@ tsconfig.json
 - Upload/static backend: dikonfigurasi oleh `NEXT_PUBLIC_UPLOADS_URL`, dipakai admin payment detail untuk preview proof image.
 - Auth/JWT backend: `authApi` dan `axios` interceptor untuk login/register/logout/refresh.
 - Content provider indirect: frontend tidak memanggil provider upstream langsung; semua lewat backend `/content/*`.
+- Provider control: frontend admin mengelola status source lewat `/admin/providers`, sedangkan halaman user hanya menerima source aktif dari `/content/sources`.
 - Payment gateway redirect: `checkout_url` dari backend dipakai frontend untuk membuka checkout Pakasir.
 - React Player media loading: `VideoPlayer` memuat stream URL dari backend episode response.
 - Google Fonts melalui `next/font/google` untuk Inter.
@@ -331,7 +344,6 @@ tsconfig.json
 - `react-player` di-load dynamic; behavior spesifik stream bergantung browser dan format URL dari backend.
 - `NEXT_PUBLIC_*` dievaluasi saat build; perubahan env produksi perlu rebuild frontend.
 - `next.config.ts` belum mengatur image remote domains karena image external memakai `unoptimized`; optimasi image Next tidak dipakai penuh.
-- Payment detail user menampilkan `qrisInfo` hardcoded di page, bukan mengambil field `qris_info` dari detail payment karena backend detail payment tidak terlihat mengembalikan instruksi QRIS.
 - Pagination admin memakai tombol Prev/Next sederhana tanpa membaca total secara lengkap untuk disabled state kecuali sessions length.
 - Tidak ditemukan test frontend unit/e2e.
 - `package-lock.json` ada di repo kerja tetapi diabaikan dalam peta karena termasuk artifact dependency resolution untuk tujuan navigasi source.

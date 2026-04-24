@@ -1,26 +1,34 @@
-﻿"use client";
+"use client";
 
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SeriesCard } from "@/components/content/SeriesCard";
 import { contentApi } from "@/lib/api/content";
 
-const fallbackSources = ["dramabite", "dramabox", "dotdrama", "melolo", "netshort", "reelife", "stardusttv"];
-
 export default function HomePage() {
   const [source, setSource] = useState("melolo");
   const sources = useQuery({ queryKey: ["sources"], queryFn: contentApi.sources });
+  const sourceList = useMemo(() => sources.data ?? [], [sources.data]);
+  const selectedSource = sourceList.includes(source) ? source : sourceList[0] || source;
   const feed = useInfiniteQuery({
-    queryKey: ["feed", source],
+    queryKey: ["feed", selectedSource],
     initialPageParam: 1,
-    queryFn: ({ pageParam }) => contentApi.feed({ source, page: pageParam, lang: "id" }),
+    queryFn: ({ pageParam }) => contentApi.feed({ source: selectedSource, page: pageParam, lang: "id" }),
     getNextPageParam: (_lastPage, pages) => pages.length + 1,
+    enabled: sourceList.length > 0,
   });
-  const sourceList = sources.data?.length ? sources.data : fallbackSources;
   const items = feed.data?.pages.flat() || [];
+
+  if (!sourceList.length && !sources.isLoading) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="rounded-xl border border-dpedia-border bg-dpedia-surface p-5 text-dpedia-muted">Belum ada provider aktif saat ini.</div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-6">
@@ -32,7 +40,7 @@ export default function HomePage() {
 
       <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
         {sourceList.map((item) => (
-          <button key={item} onClick={() => setSource(item)} className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${source === item ? "border-dpedia-primary bg-dpedia-primary text-white" : "border-dpedia-border bg-dpedia-surface text-dpedia-muted"}`}>
+          <button key={item} onClick={() => setSource(item)} className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${selectedSource === item ? "border-dpedia-primary bg-dpedia-primary text-white" : "border-dpedia-border bg-dpedia-surface text-dpedia-muted"}`}>
             {item}
           </button>
         ))}
@@ -51,4 +59,3 @@ export default function HomePage() {
     </main>
   );
 }
-

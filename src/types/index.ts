@@ -135,3 +135,9 @@ export interface AdminStats {
   pending_payments: number;
   total_revenue: number;
 }
+
+export interface ProviderStatus {
+  source: string;
+  is_enabled: boolean;
+  updated_at: string;
+}
