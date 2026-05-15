@@ -9,7 +9,7 @@ import { SeriesCard } from "@/components/content/SeriesCard";
 import { contentApi } from "@/lib/api/content";
 
 export default function HomePage() {
-  const [source, setSource] = useState("melolo");
+  const [source, setSource] = useState("velolo");
   const sources = useQuery({ queryKey: ["sources"], queryFn: contentApi.sources });
   const sourceList = useMemo(() => sources.data ?? [], [sources.data]);
   const selectedSource = sourceList.includes(source) ? source : sourceList[0] || source;
